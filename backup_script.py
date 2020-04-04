@@ -2,6 +2,7 @@
 
 import subprocess
 import time
+import os
 
 class Backup:
     def __init__(self):
@@ -49,12 +50,16 @@ class Backup:
 
     def mount_network_drive(self):
         map_folder = "/opt/scripts/new_backup/RemoteBackup"
-        print("Mounting NAS to "+map_folder)
-        try:
-            subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o user=Foklan,password=adM1n*72506187K", shell=True)
-            print("Network drive has been mounted!")
-        except:
-            print("\nNAS disk was not succesfully mounted!!!!!!!!\n")
+        print("Check if network drive is mounted...")
+        if os.path.isdir(self.move_to):
+            print("Network drive is ALREADY MOUNTED!")
+        else:
+            print("Mounting NAS to " + map_folder)
+            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o user=Foklan,password=adM1n*72506187K", shell=True)
+            if exit_code == 0:
+                print("Network drive has been mounted!")
+            else:
+                print("\nNAS disk was not succesfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
 
     def move_zip_to_nas(self):
         print("Moving compressed file to NAS...")
