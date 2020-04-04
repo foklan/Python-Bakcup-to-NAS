@@ -14,11 +14,20 @@ class Backup:
         self.mac_address_of_nas = "48:0f:cf:33:e3:aa"
 
     def start_nas(self):
-        subprocess.call("wakeonlan"+ self.mac_address_of_nas, shell=True)
+        print("Open Media Vault (OMV) is starting...")
+        error_code = subprocess.call("wakeonlan "+ self.mac_address_of_nas, shell=True)
+        if error_code == 0:
+            print("OMV has been started!")
+        else:
+            print("Error {} during starting OMV!".format(error_code))
 
     def compress_folders(self):
         print("Executing LOCAL backup process...")
-        subprocess.call("sudo tar -cvzf " + self.backup_to+self.backup_name + " *", shell=True)
+        error_code = subprocess.call("sudo tar -cvzf " + self.backup_to+self.backup_name + " /home/pi/*", shell=True)
+        if error_code == 0:
+            print("Compression is DONE!")
+        else:
+            print("Compression exited with error {}".format(error_code))
 
     def pinger(self):
         pass
