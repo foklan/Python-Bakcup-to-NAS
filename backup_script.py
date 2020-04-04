@@ -5,10 +5,10 @@ import time
 
 class Backup:
     def __init__(self):
-        self.backup_from = "/home/"
-        self.backup_to = "/opt/scripts/new_backup/RemoteBackup/_HOST_BACKUPS/RaspberryPi3"
+        self.backup_from = "/home/pi/*"
+        self.backup_to = "/opt/scripts/new_backup/"
         self.backup_name = "NEW-BACKUP-RPi3.tar.gz"
-        self.move_to = None
+        self.move_to = "/opt/scripts/new_backup/RemoteBackup/_HOST_BACKUPS/RaspberryPi3/"
         self.backup_script_folder = None
         self.backup_log = None
         self.do_backup = None
@@ -26,7 +26,8 @@ class Backup:
 
     def compress_folders(self):
         print("Executing LOCAL backup process...")
-        exit_code = subprocess.call("sudo tar -czf " + self.backup_to+self.backup_name + " /home/pi/*", shell=True)
+        path_for_backup_file = self.backup_to+self.backup_name
+        exit_code = subprocess.call("sudo tar -czf " + path_for_backup_file + " " + self.backup_from, shell=True)
         if exit_code == 0:
             print("Compression is DONE!")
         else:
@@ -49,12 +50,15 @@ class Backup:
     def mount_network_drive(self):
         map_folder = "/opt/scripts/new_backup/RemoteBackup"
         print("Mounting NAS to "+map_folder)
-        subprocess.call("mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o user=Foklan,password=adM1n*72506187K", shell=True)
-        print("Network drive has been mounted!")
+        try:
+            subprocess.call("mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o user=Foklan,password=adM1n*72506187K", shell=True)
+            print("Network drive has been mounted!")
+        except:
+            print("\nNAS disk was not succesfully mounted!!!!!!!!\n")
 
     def move_zip_to_nas(self):
         print("Moving compressed file to NAS...")
-        exit_code = subprocess.call("sudo mv -f " + self.backup_to+self.backup_name + " " + self.backup_to)
+        exit_code = subprocess.call("sudo mv -f " + self.backup_to+self.backup_name + " " + self.move_to, shell=True)
         if exit_code == 0:
             print("Backup was successfully moved!")
         else:
