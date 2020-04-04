@@ -33,7 +33,8 @@ class Backup:
     def pinger(self):
         print("Waiting for OMV to bootup...")
         while self.ping_counter > 0:
-            exit_code = subprocess.call("ping 10.0.2.1", shell=True)
+            exit_code = subprocess.call("ping -c 1 10.0.2.1", shell=True)
+            self.ping_counter -= 1
             if exit_code == 0:
                 print("OMV is ONLINE!")
                 break
