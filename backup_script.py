@@ -51,7 +51,7 @@ class Backup:
         map_folder = "/opt/scripts/new_backup/RemoteBackup"
         print("Mounting NAS to "+map_folder)
         try:
-            subprocess.call("mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o user=Foklan,password=adM1n*72506187K", shell=True)
+            subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o user=Foklan,password=adM1n*72506187K", shell=True)
             print("Network drive has been mounted!")
         except:
             print("\nNAS disk was not succesfully mounted!!!!!!!!\n")
