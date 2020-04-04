@@ -6,6 +6,7 @@ import os
 
 class Backup:
     def __init__(self):
+        self.mac_address_of_nas = "48:0f:cf:33:e3:aa"
         self.backup_from = "/home/pi/*"
         self.backup_to = "/opt/scripts/new_backup/"
         self.backup_name = "NEW-BACKUP-RPi3.tar.gz"
@@ -15,7 +16,6 @@ class Backup:
         self.do_backup = None
         self.ping_counter = 100
         self.do_shutdown = False
-        self.mac_address_of_nas = "48:0f:cf:33:e3:aa"
 
     def start_nas(self):
         print("Open Media Vault (OMV) is starting...")
