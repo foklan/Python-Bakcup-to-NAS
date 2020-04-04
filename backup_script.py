@@ -3,7 +3,7 @@ import subprocess
 class Backup:
     def __init__(self):
         self.backup_from = "/home/"
-        self.backup_to = "/opt/scripts/new_backup/Raspberry-Pi-Backup/"
+        self.backup_to = "/opt/scripts/new_backup/"
         self.backup_name = "NEW-BACKUP-RPi3.tar.gz"
         self.move_to = None
         self.backup_script_folder = None
@@ -14,11 +14,11 @@ class Backup:
         self.mac_address_of_nas = "48:0f:cf:33:e3:aa"
 
     def start_nas(self):
-        subprocess.call(["wakeonlan", self.mac_address_of_nas], shell=True)
+        subprocess.call("wakeonlan"+ self.mac_address_of_nas, shell=True)
 
     def compress_folders(self):
         print("Executing LOCAL backup process...")
-        subprocess.call(["tar", "-cvzf", self.backup_to+self.backup_name], shell=True)
+        subprocess.call("sudo tar -cvzf " + self.backup_to+self.backup_name + " *", shell=True)
 
     def pinger(self):
         pass
