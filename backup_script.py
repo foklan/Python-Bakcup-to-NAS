@@ -16,7 +16,6 @@ class Backup:
         self.backup_log = None
         self.do_backup = None
         self.ping_counter = 100
-        self.do_shutdown = None
 
     def error_code_print(self, code):
         print("Error {} ocurred during execution!".format(code))
@@ -45,11 +44,10 @@ class Backup:
             exit_code = subprocess.call("ping -c 1 10.0.2.1", shell=True)
             if exit_code == 0:
                 print("OMV is running and will not be turned off after backup!!!")
-                self.do_shutdown = False
-                return True
+                return False
             else:
                 print("OMV is not running and will be turned on!")
-                return False
+                return True
 
         # State 2 should be started after start_nas method to check if OMV booted up
         elif state == 2:
@@ -127,21 +125,25 @@ class Backup:
             print("Error {} occurred!".format(exit_code))
 
     def shutdown_nas(self):
-        if self.do_shutdown:
-            print("OMV is shutting down...")
-            subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'",shell=True)
+        print("OMV is shutting down...")
+        exit_code = subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'",shell=True)
+        if exit_code == 0:
+            print("Command to shutdown OMV was successfully executed!")
         else:
-            print("OMV will remain ONLINE!")
+            self.error_code_print(exit_code)
 
     def start(self):
-        if self.pinger(1):
+        nas_was_offline = self.pinger(1)
+        if nas_was_offline:
             self.start_nas()
         self.compress_folders()
-        self.pinger(2)
+        if nas_was_offline:
+            self.pinger(2)
         self.credential_operation()
         self.mount_network_drive()
         self.move_zip_to_nas()
-
+        if nas_was_offline:
+            self.shutdown_nas()
 
 
 backup = Backup()
