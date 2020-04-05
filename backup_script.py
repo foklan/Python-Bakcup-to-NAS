@@ -92,13 +92,13 @@ class Backup:
             subprocess.call("sudo chmod 400 cred.txt", shell=True)
 
     def mount_network_drive(self):
-        map_folder = "/opt/scripts/new_backup/RemoteBackup"
+        map_folder = "/opt/scripts/new_backup/RemoteBackup/"
         print("Check if network drive is mounted...")
         if os.path.isdir(self.move_to):
             print("Network drive is ALREADY MOUNTED!")
         else:
             print("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o credentials=" + self.working_directory + " cred.txt", shell=True)
+            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o cred=" + self.working_directory + "cred.txt", shell=True)
             if exit_code == 0:
                 print("Network drive has been mounted!")
             else:
