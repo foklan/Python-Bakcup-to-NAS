@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# komentar
 
 import subprocess
 import time
