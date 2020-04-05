@@ -6,6 +6,7 @@ import os
 
 class Backup:
     def __init__(self):
+        self.working_directory = "/opt/scripts/new_backup/Raspberry-Pi-Backup/"
         self.mac_address_of_nas = "48:0f:cf:33:e3:aa"
         self.backup_from = "/home/pi/*"
         self.backup_to = "/opt/scripts/new_backup/"
@@ -16,6 +17,9 @@ class Backup:
         self.do_backup = None
         self.ping_counter = 100
         self.do_shutdown = False
+
+    def error_code_print(self, code):
+        print("Error {} ocurred during execution!".format(code))
 
     def start_nas(self):
         print("Open Media Vault (OMV) is starting...")
@@ -47,6 +51,45 @@ class Backup:
                 time.sleep(4)
             else:
                 print("Error {} occurred!".format(exit_code))
+
+    def credential_operation(self):
+        os.chdir(self.working_directory)
+        file_exist = os.path.exists("cred.txt")
+        if file_exist:
+            with open('cred.txt') as f:
+                if "password=" in f.read():
+                    print("File cred.txt is OK")
+                else:
+                    print("File si probably empty!")
+        else:
+            print("File does not exist!")
+            print("Process of creating new cred.txt file is in progress...")
+            sys_usr = input("Please enter system username: ")
+            usr = input("Please enter username for network drive: ")
+            psw = input("Please enter password for network drive: ")
+
+            # Creating cred.txt
+            print("Creating cred.txt")
+            exit_code = subprocess.call("sudo touch cred.txt", shell=True)
+            if exit_code == 0:
+                print("File cred.txt was successfully created!")
+            else:
+                self.error_code_print(exit_code)
+
+            # Changing privileges
+            exit_code = subprocess.call("sudo chown " + sys_usr + ":" + sys_usr + " cred.txt", shell=True)
+            if exit_code == 0:
+                print("Privileges successfully granted!")
+            else:
+                self.error_code_print(exit_code)
+
+            # Inserting config lines into cred.txt
+            subprocess.call("sudo echo 'username='"+usr+" >> cred.txt", shell=True)
+            subprocess.call("sudo echo 'password='" + psw + " >> cred.txt", shell=True)
+
+            # Changing privileges back to root
+            subprocess.call("sudo chown root:root cred.txt", shell=True)
+            subprocess.call("sudo chmod 400 cred.txt", shell=True)
 
     def mount_network_drive(self):
         map_folder = "/opt/scripts/new_backup/RemoteBackup"
