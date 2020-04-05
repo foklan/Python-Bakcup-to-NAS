@@ -6,7 +6,7 @@ import os
 
 class Backup:
     def __init__(self):
-        self.working_directory = "/opt/scripts/new_backup/Raspberry-Pi-Backup/"
+        self.working_directory = "/opt/scripts/new_backup/"
         self.mac_address_of_nas = "48:0f:cf:33:e3:aa"
         self.backup_from = "/home/pi/*"
         self.backup_to = "/opt/scripts/new_backup/"
@@ -98,7 +98,7 @@ class Backup:
             print("Network drive is ALREADY MOUNTED!")
         else:
             print("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o user=Foklan,password=adM1n*72506187K", shell=True)
+            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o credentials=" + self.working_directory + " cred.txt", shell=True)
             if exit_code == 0:
                 print("Network drive has been mounted!")
             else:
