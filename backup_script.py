@@ -116,6 +116,7 @@ class Backup:
         self.start_nas()
         self.compress_folders()
         self.pinger()
+        self.credential_operation()
         self.mount_network_drive()
         self.move_zip_to_nas()
 
