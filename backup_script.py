@@ -1,5 +1,4 @@
 #!/usr/bin/python
-# komentar
 
 import subprocess
 import time
@@ -127,6 +126,13 @@ class Backup:
         else:
             print("Error {} occurred!".format(exit_code))
 
+    def shutdown_nas(self):
+        if self.do_shutdown:
+            print("OMV is shutting down...")
+            subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'",shell=True)
+        else:
+            print("OMV will remain ONLINE!")
+
     def start(self):
         if self.pinger(1):
             self.start_nas()
@@ -136,12 +142,7 @@ class Backup:
         self.mount_network_drive()
         self.move_zip_to_nas()
 
-    def shutdown_nas(self):
-        if self.do_shutdown:
-            print("OMV is going to be shutted down")
-            subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'",shell=True)
-        else:
-            print
+
 
 backup = Backup()
 backup.start()
