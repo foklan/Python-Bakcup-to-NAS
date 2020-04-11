@@ -92,7 +92,7 @@ class Backup:
         if file_exist:
             parser.read('credentials.ini')
             sysname = parser.get('credentials', 'sysname')
-            username = parser.get('credentials', 'name')
+            username = parser.get('credentials', 'username')
             password = parser.get('credentials', 'password')
             if sysname == "" or username == "" or password == "":
                 print("Configuration file is missing login details...")
