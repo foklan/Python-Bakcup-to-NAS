@@ -1,8 +1,11 @@
 #!/usr/bin/python
 
+from configparser import ConfigParser
 import subprocess
+import logging
 import time
 import os
+
 
 class Backup:
     def __init__(self):
@@ -16,12 +19,11 @@ class Backup:
         self.backup_log = None
         self.do_backup = None
         self.ping_counter = 100
-
-    def error_code_print(self, code):
-        print("Error {} ocurred during execution!".format(code))
+        logging.basicConfig(filename='backup.log', level=logging.DEBUG,
+                            format='%(asctime)s:%(levelname)s:%(message)s')
 
     def start_nas(self):
-        print("Open Media Vault (OMV) is starting...")
+        logging.info("Open Media Vault (OMV) is starting...")
         exit_code = subprocess.call("wakeonlan "+ self.mac_address_of_nas, shell=True)
         if exit_code == 0:
             print("OMV has been started!")
@@ -64,44 +66,47 @@ class Backup:
                 else:
                     print("Error {} occurred!".format(exit_code))
 
+    def create_credentials_file(self):
+        sysname = input("Please enter system username: ")
+        username = input("Please enter username for network drive: ")
+        password = input("Please enter password for network drive: ")
+
+        config = ConfigParser()
+
+        config['credentials'] = {
+            'sysname': sysname,
+            'username': username,
+            'password': password
+        }
+
+        with open('./credentials.ini', 'w') as f:
+            config.write(f)
+
+        # Changing privileges to root
+        subprocess.call("sudo chown root:root credentials.ini", shell=True)
+        subprocess.call("sudo chmod 400 credentials.ini", shell=True)
+
     def credential_operation(self):
+        parser = ConfigParser()
+
         os.chdir(self.working_directory)
-        file_exist = os.path.exists("cred.txt")
+        file_exist = os.path.exists("credentials.ini")
         if file_exist:
-            with open('cred.txt') as f:
-                if "password=" in f.read():
-                    print("File cred.txt is OK")
-                else:
-                    print("File si probably empty!")
+            parser.read('credentials.ini')
+            sysname = parser.get('credentials', 'sysname')
+            username = parser.get('credentials', 'name')
+            password = parser.get('credentials', 'password')
+            if sysname == "" or username == "" or password == "":
+                print("Configuration file is missing login details...")
+                self.create_credentials_file()
+            else:
+                pass
         else:
             print("File does not exist!")
-            print("Process of creating new cred.txt file is in progress...")
-            sys_usr = input("Please enter system username: ")
-            usr = input("Please enter username for network drive: ")
-            psw = input("Please enter password for network drive: ")
+            print("Process of creating new credentials.ini file is in progress...")
 
             # Creating cred.txt
-            print("Creating cred.txt")
-            exit_code = subprocess.call("sudo touch cred.txt", shell=True)
-            if exit_code == 0:
-                print("File cred.txt was successfully created!")
-            else:
-                self.error_code_print(exit_code)
-
-            # Changing privileges
-            exit_code = subprocess.call("sudo chown " + sys_usr + ":" + sys_usr + " cred.txt", shell=True)
-            if exit_code == 0:
-                print("Privileges successfully granted!")
-            else:
-                self.error_code_print(exit_code)
-
-            # Inserting config lines into cred.txt
-            subprocess.call("sudo echo 'username='"+usr+" >> cred.txt", shell=True)
-            subprocess.call("sudo echo 'password='" + psw + " >> cred.txt", shell=True)
-
-            # Changing privileges back to root
-            subprocess.call("sudo chown root:root cred.txt", shell=True)
-            subprocess.call("sudo chmod 400 cred.txt", shell=True)
+            self.create_credentials_file()
 
     def mount_network_drive(self):
         map_folder = "/opt/scripts/new_backup/RemoteBackup/"
@@ -110,7 +115,7 @@ class Backup:
             print("Network drive is ALREADY MOUNTED!")
         else:
             print("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o cred=" + self.working_directory + "cred.txt", shell=True)
+            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o cred=" + self.working_directory + "credentials.ini", shell=True)
             if exit_code == 0:
                 print("Network drive has been mounted!")
             else:
@@ -130,7 +135,7 @@ class Backup:
         if exit_code == 0:
             print("Command to shutdown OMV was successfully executed!")
         else:
-            self.error_code_print(exit_code)
+            print("Error {} ocurred!".format(exit_code))
 
     def start(self):
         nas_was_offline = self.pinger(1)
