@@ -107,13 +107,17 @@ class Backup:
             self.create_credentials_file()
 
     def mount_network_drive(self):
+        parser = ConfigParser()
+        user = parser.get('credentials', 'username')
+        pswd = parser.get('credentials', 'password')
+
         map_folder = "/opt/scripts/new_backup/RemoteBackup/"
         print("Check if network drive is mounted...")
         if os.path.isdir(self.move_to):
             print("Network drive is ALREADY MOUNTED!")
         else:
             print("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup " + map_folder + " -o cred=" + self.working_directory + "credentials.ini", shell=True)
+            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup "+map_folder+" -o user="+user+", pass="+pswd, shell=True)
             if exit_code == 0:
                 print("Network drive has been mounted!")
             else:
