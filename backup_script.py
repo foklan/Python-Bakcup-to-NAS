@@ -108,6 +108,7 @@ class Backup:
 
     def mount_network_drive(self):
         parser = ConfigParser()
+        parser.read('credentials.ini')
         user = parser.get('credentials', 'username')
         pswd = parser.get('credentials', 'password')
 
