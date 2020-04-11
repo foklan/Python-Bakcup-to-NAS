@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 from configparser import ConfigParser
 import subprocess
@@ -19,8 +19,6 @@ class Backup:
         self.backup_log = None
         self.do_backup = None
         self.ping_counter = 100
-        logging.basicConfig(filename='backup.log', level=logging.DEBUG,
-                            format='%(asctime)s:%(levelname)s:%(message)s')
 
     def start_nas(self):
         logging.info("Open Media Vault (OMV) is starting...")
