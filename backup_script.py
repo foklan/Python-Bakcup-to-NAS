@@ -118,7 +118,7 @@ class Backup:
             print("Network drive is ALREADY MOUNTED!")
         else:
             print("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup "+map_folder+" -o user="+user+", pass="+pswd, shell=True)
+            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup "+map_folder+" -o username="+user+",password="+pswd, shell=True)
             if exit_code == 0:
                 print("Network drive has been mounted!")
             else:
