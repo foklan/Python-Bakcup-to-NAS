@@ -15,10 +15,8 @@ class Backup:
         self.backup_to = "/opt/scripts/new_backup/"
         self.backup_name = "NEW-BACKUP-RPi3.tar.gz"
         self.move_to = "/opt/scripts/new_backup/RemoteBackup/_HOST_BACKUPS/RaspberryPi3/"
-        self.backup_script_folder = None
-        self.backup_log = None
-        self.do_backup = None
         self.ping_counter = 100
+        self.parser = ConfigParser()
 
     def start_nas(self):
         logging.info("Open Media Vault (OMV) is starting...")
@@ -38,6 +36,7 @@ class Backup:
             print("Compression exited with error {}".format(exit_code))
 
     def pinger(self, state):
+        # Ping once
         # State 1 should be started ONLY ON START of the script to check if OMV is running
         if state == 1:
             print("Check if OMV is already running...")
@@ -49,6 +48,7 @@ class Backup:
                 print("OMV is not running and will be turned on!")
                 return True
 
+        # Ping until host is not up
         # State 2 should be started after start_nas method to check if OMV booted up
         elif state == 2:
             print("Waiting for OMV to bootup...")
@@ -65,37 +65,33 @@ class Backup:
                     print("Error {} occurred!".format(exit_code))
 
     def create_credentials_file(self):
-        sysname = input("Please enter system username: ")
-        username = input("Please enter username for network drive: ")
-        password = input("Please enter password for network drive: ")
-
-        config = ConfigParser()
-
-        config['credentials'] = {
-            'sysname': sysname,
-            'username': username,
-            'password': password
+        # Prompt user to insert values inside of credentials.ini
+        self.parser['credentials'] = {
+            'sysname': input("Please enter system username: "),
+            'username': input("Please enter username for network drive: "),
+            'password': input("Please enter password for network drive: ")
         }
-
+        # Create credentials.ini and insert values given by user
         with open('./credentials.ini', 'w') as f:
-            config.write(f)
+            self.parser.write(f)
 
-        # Changing privileges to root
+        # Changing privileges to root and set read only for root
         subprocess.call("sudo chown root:root credentials.ini", shell=True)
         subprocess.call("sudo chmod 400 credentials.ini", shell=True)
 
     def credential_operation(self):
-        parser = ConfigParser()
-
         os.chdir(self.working_directory)
-        file_exist = os.path.exists("credentials.ini")
-        if file_exist:
-            parser.read('credentials.ini')
-            sysname = parser.get('credentials', 'sysname')
-            username = parser.get('credentials', 'username')
-            password = parser.get('credentials', 'password')
-            if sysname == "" or username == "" or password == "":
+
+        # Check if credentials.ini does exists
+        if os.path.exists("credentials.ini"):
+
+            # Check if credentials.ini contains required values
+            self.parser.read('credentials.ini')
+            if self.parser.get('credentials', 'sysname') == "" \
+                    or self.parser.get('credentials', 'username') == "" \
+                    or self.parser.get('credentials', 'password') == "":
                 print("Configuration file is missing login details...")
+                # If there is missing something, start creating credentials.ini again
                 self.create_credentials_file()
             else:
                 pass
@@ -107,10 +103,7 @@ class Backup:
             self.create_credentials_file()
 
     def mount_network_drive(self):
-        parser = ConfigParser()
-        parser.read('credentials.ini')
-        user = parser.get('credentials', 'username')
-        pswd = parser.get('credentials', 'password')
+        self.parser.read('credentials.ini')
 
         map_folder = "/opt/scripts/new_backup/RemoteBackup/"
         print("Check if network drive is mounted...")
@@ -118,7 +111,8 @@ class Backup:
             print("Network drive is ALREADY MOUNTED!")
         else:
             print("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup "+map_folder+" -o username="+user+",password="+pswd, shell=True)
+            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup "+map_folder+" -o username="+
+                                        self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
             if exit_code == 0:
                 print("Network drive has been mounted!")
             else:
