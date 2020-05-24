@@ -1,23 +1,57 @@
 #!/usr/bin/python3
 
 from configparser import ConfigParser
+from getpass import getpass
 import subprocess
 import logging
 import time
 import os
 
 
+class Configuration:
+    def __init__(self):
+        pass
+
+
 class Backup:
     def __init__(self):
-        self.working_directory = "/opt/scripts/new_backup/"
-        self.mac_address_of_nas = "48:0f:cf:33:e3:aa"
-        self.backup_from = "/home/pi/*"
-        self.backup_to = "/opt/scripts/new_backup/"
-        self.backup_name = "NEW-BACKUP-RPi3.tar.gz"
-        self.move_to = "/opt/scripts/new_backup/RemoteBackup/_HOST_BACKUPS/RaspberryPi3/"
-        self.ping_counter = 100
+        self.create_config_file()
         self.parser = ConfigParser()
+        self.parser.read('config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
+        self.working_directory = os.getcwd()
+        self.mac_address_of_nas = self.parser.get('nas_info', 'nas_ip')
+        self.backup_from = self.parser.get('directories', 'backup_from')
+        self.backup_to = self.parser.get('directories', 'backup_to')
+        self.backup_name = self.parser.get('directories', 'backup_name')
+        self.move_to = self.parser.get('directories', 'nas_mountpoint')
+        self.ping_counter = 100
+
+    def create_config_file(self):
+        self.parser['directories'] = {
+            'backup_from': '/home',
+            'backup_to': '',
+            'backup_name': 'NEW-BACKUP-RPi3.tar.gz',
+            'nas_mountpoint': self.working_directory+'/remote_mount'
+        }
+        self.parser['nas_info'] = {
+            'nas_ip': '10.0.2.1',
+            'nas_mac': '48:0f:cf:33:e3:aa'
+        }
+
+        with open('./config.ini', 'w') as f:
+            self.parser.write(f)
+
+    def prepare_workspace(self):
+        # Check if NASHDD exists
+        if os.path.exists("/media/NASHDD"):
+            logging.info("Directory NASHDD already exists!")
+        else:
+            exit_code = subprocess.call("sudo mkdir NASHDD", shell=True)
+            if exit_code == 0:
+                logging.info("Directory was successfully created!")
+            else:
+                logging.error("Error during folder creating process!")
 
     def start_nas(self):
         logging.info("Open Media Vault (OMV) is starting...")
@@ -25,7 +59,7 @@ class Backup:
         if exit_code == 0:
             logging.info("OMV has been started!")
         else:
-            logging.critical("Error {} during starting OMV!".format(exit_code))
+            logging.error("Error {} during OMV start!".format(exit_code))
 
     def compress_folders(self):
         logging.info("Executing LOCAL backup process...")
@@ -68,9 +102,8 @@ class Backup:
     def create_credentials_file(self):
         # Prompt user to insert values inside of credentials.ini
         self.parser['credentials'] = {
-            'sysname': input("Please enter system username: "),
-            'username': input("Please enter username for network drive: "),
-            'password': input("Please enter password for network drive: ")
+            'username': input("Please ENTER USERNAME for network drive: "),
+            'password': getpass("Please ENTER PASSWORD for network drive: ")
         }
         # Create credentials.ini and insert values given by user
         with open('./credentials.ini', 'w') as f:
@@ -88,16 +121,14 @@ class Backup:
 
             # Check if credentials.ini contains required values
             self.parser.read('credentials.ini')
-            if self.parser.get('credentials', 'sysname') == "" \
-                    or self.parser.get('credentials', 'username') == "" \
-                    or self.parser.get('credentials', 'password') == "":
+            if self.parser.get('credentials', 'username') == "" or self.parser.get('credentials', 'password') == "":
                 logging.warning("Configuration file is missing login details...")
                 # If there is missing something, start creating credentials.ini again
                 self.create_credentials_file()
             else:
                 pass
         else:
-            logging.warning("File does not exist!")
+            logging.warning("File credentials.ini does not exist!")
             logging.info("Process of creating new credentials.ini file is in progress...")
 
             # Creating cred.txt
@@ -106,7 +137,7 @@ class Backup:
     def mount_network_drive(self):
         self.parser.read('credentials.ini')
 
-        map_folder = "/opt/scripts/new_backup/RemoteBackup/"
+        map_folder = "/media/NASHDD"
         logging.info("Check if network drive is mounted...")
         if os.path.isdir(self.move_to):
             logging.info("Network drive is ALREADY MOUNTED!")
@@ -116,14 +147,16 @@ class Backup:
                                         self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
             if exit_code == 0:
                 logging.info("Network drive has been mounted!")
+            elif exit_code == 32:
+                logging.critical("NAS disk was not successfully mounted, check if credentials are correct in credentials.ini!")
             else:
-                logging.critical("\nNAS disk was not succesfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
+                logging.critical("NAS disk was not successfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
 
     def move_zip_to_nas(self):
         logging.info("Moving compressed file to NAS...")
         exit_code = subprocess.call("sudo mv -f " + self.backup_to+self.backup_name + " " + self.move_to, shell=True)
         if exit_code == 0:
-            logging.info("Backup was successfully moved!")
+            logging.info("Backup was successfully moved!\n")
         else:
             logging.error("Error {} occurred!".format(exit_code))
 
@@ -131,7 +164,7 @@ class Backup:
         logging.info("OMV is shutting down...")
         exit_code = subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'",shell=True)
         if exit_code == 0:
-            logging.info("Command to shutdown OMV was successfully executed!")
+            logging.info("Command to shutdown OMV was successfully executed!\n")
         else:
             logging.error("Error {} ocurred!".format(exit_code))
 
@@ -147,6 +180,7 @@ class Backup:
         self.move_zip_to_nas()
         if nas_was_offline:
             self.shutdown_nas()
+
 
 
 backup = Backup()
