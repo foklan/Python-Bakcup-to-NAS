@@ -32,7 +32,7 @@ class Backup:
             'backup_from': '/home',
             'backup_to': '',
             'backup_name': 'NEW-BACKUP-RPi3.tar.gz',
-            'nas_mountpoint': self.working_directory+'/remote_mount'
+            'nas_mountpoint': '/media/NASHDD'
         }
         self.parser['nas_info'] = {
             'nas_ip': '10.0.2.1',
@@ -118,7 +118,6 @@ class Backup:
 
         # Check if credentials.ini does exists
         if os.path.exists("credentials.ini"):
-
             # Check if credentials.ini contains required values
             self.parser.read('credentials.ini')
             if self.parser.get('credentials', 'username') == "" or self.parser.get('credentials', 'password') == "":
