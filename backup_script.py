@@ -20,7 +20,7 @@ class Backup:
         self.parser.read('config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
         self.working_directory = os.getcwd()
-        self.mac_address_of_nas = self.parser.get('nas_info', 'nas_ip')
+        self.mac_address_of_nas = self.parser.get('nas_info', 'nas_mac')
         self.backup_from = self.parser.get('directories', 'backup_from')
         self.backup_to = self.parser.get('directories', 'backup_to')
         self.backup_name = self.parser.get('directories', 'backup_name')
