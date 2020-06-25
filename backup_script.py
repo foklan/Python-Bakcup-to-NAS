@@ -121,7 +121,7 @@ class Backup:
             logging.info("Network drive is ALREADY MOUNTED!")
         else:
             logging.info("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup "+map_folder+" -o username="+
+            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup/_HOST_BACKUPS/rpi_test "+map_folder+" -o username="+
                                         self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
             if exit_code == 0:
                 logging.info("Network drive has been mounted!")
