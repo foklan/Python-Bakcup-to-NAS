@@ -15,7 +15,6 @@ class Configuration:
 
 class Backup:
     def __init__(self):
-        self.create_config_file()
         self.parser = ConfigParser()
         self.parser.read('config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
