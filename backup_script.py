@@ -26,7 +26,7 @@ class Backup:
         if os.path.exists("/media/NASHDD"):
             logging.info("Directory NASHDD already exists!")
         else:
-            exit_code = subprocess.call("sudo mkdir NASHDD", shell=True)
+            exit_code = subprocess.call("sudo mkdir /media/NASHDD", shell=True)
             if exit_code == 0:
                 logging.info("Directory was successfully created!")
             else:
