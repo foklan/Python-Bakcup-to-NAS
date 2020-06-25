@@ -1,18 +1,22 @@
 from configparser import ConfigParser
 
-parser = ConfigParser()
+config = ConfigParser()
 
-parser['directories'] = {
-    'backupFrom': '/home',
-    'backupTo': '',
-    'backupName': 'NEW-BACKUP-RPi3.tar.gz',
-    'nasMountpoint': '/media/NASHDD'
-}
-parser['nas_info'] = {
-    'nasIp': '10.0.2.1',
-    'nasMac': '48:0f:cf:33:e3:aa'
-}
+config['BASIC INFO'] = {}
+basicinfo = config['BASIC INFO']
+basicinfo['Name'] = 'Marian'
+basicinfo['Age'] = '22'
 
-with open('config.ini', 'w') as f:
-    parser.write(f)
+config['NETWORK'] = {'IP': '10.0.1.100',
+                     'MASK': '8',
+                     'GW': '10.0.1.1',
+                     'DNS': '10.0.1.1'}
+
+config['address'] = {'street': 'Mak',
+                     'St. number': '8',
+                     'Postal code': '01001',
+                     'City': 'Zilina'}
+
+with open('config.ini', 'w') as configfile:
+    config.write(configfile)
 
