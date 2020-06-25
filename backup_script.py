@@ -14,27 +14,12 @@ class Backup:
         self.parser.read('config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
         self.working_directory = os.getcwd()
-        self.mac_address_of_nas = self.parser.get('nas_info', 'nas_mac')
-        self.backup_from = self.parser.get('directories', 'backup_from')
-        self.backup_to = self.parser.get('directories', 'backup_to')
-        self.backup_name = self.parser.get('directories', 'backup_name')
-        self.move_to = self.parser.get('directories', 'nas_mountpoint')
+        self.mac_address_of_nas = self.parser.get('NAS_INFO', 'mac')
+        self.backup_from = self.parser.get('FILE', 'backup_from')
+        self.backup_to = self.parser.get('FILE', 'backup_to')
+        self.backup_name = self.parser.get('FILE', 'backup_name')
+        self.move_to = self.parser.get('FILE', 'nas_mountpoint')
         self.ping_counter = 100
-
-    def create_config_file(self):
-        self.parser['directories'] = {
-            'backup_from': '/home',
-            'backup_to': '',
-            'backup_name': 'NEW-BACKUP-RPi3.tar.gz',
-            'nas_mountpoint': '/media/NASHDD'
-        }
-        self.parser['nas_info'] = {
-            'nas_ip': '10.0.2.1',
-            'nas_mac': '48:0f:cf:33:e3:aa'
-        }
-
-        with open('./config.ini', 'w') as f:
-            self.parser.write(f)
 
     def prepare_workspace(self):
         # Check if NASHDD exists
