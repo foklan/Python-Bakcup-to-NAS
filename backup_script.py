@@ -8,11 +8,6 @@ import time
 import os
 
 
-class Configuration:
-    def __init__(self):
-        pass
-
-
 class Backup:
     def __init__(self):
         self.parser = ConfigParser()
