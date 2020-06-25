@@ -114,7 +114,6 @@ class Backup:
 
     def mount_network_drive(self):
         self.parser.read('credentials.ini')
-        take = self.parser.get()
 
         map_folder = "/media/NASHDD"
         logging.info("Check if network drive is mounted...")
@@ -122,9 +121,9 @@ class Backup:
             logging.info("Network drive is ALREADY MOUNTED!")
         else:
             logging.info("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //"+take('NAS_INFO', 'IP')+take('NAS_INFO', 'backup_folder')+
-                                        take('FILE', 'backup_to')+" "+take('FILE', 'nas_mountpoint')+" -o username="+
-                                        take('credentials', 'username')+",password="+take('credentials', 'password'), shell=True)
+            exit_code = subprocess.call("sudo mount.cifs -v //"+self.parser.get('NAS_INFO', 'IP')+self.parser.get('NAS_INFO', 'backup_folder')+
+                                        self.parser.get('FILE', 'backup_to')+" "+self.parser.get('FILE', 'nas_mountpoint')+" -o username="+
+                                        self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
             if exit_code == 0:
                 logging.info("Network drive has been mounted!")
             elif exit_code == 32:
