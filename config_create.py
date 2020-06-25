@@ -1,5 +1,6 @@
-from configparser import ConfigParser as config
+from configparser import ConfigParser
 
+config = ConfigParser()
 
 config['directories'] = {
     'backup_from': '/home',
