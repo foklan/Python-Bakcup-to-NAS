@@ -1,16 +1,16 @@
 from configparser import ConfigParser as parser
 
 parser['directories'] = {
-    'backup_from': '/home',
-    'backup_to': '',
-    'backup_name': 'NEW-BACKUP-RPi3.tar.gz',
-    'nas_mountpoint': '/media/NASHDD'
+    'backupFrom': '/home',
+    'backupTo': '',
+    'backupName': 'NEW-BACKUP-RPi3.tar.gz',
+    'nasMountpoint': '/media/NASHDD'
 }
 parser['nas_info'] = {
-    'nas_ip': '10.0.2.1',
-    'nas_mac': '48:0f:cf:33:e3:aa'
+    'nasIp': '10.0.2.1',
+    'nasMac': '48:0f:cf:33:e3:aa'
 }
 
-with open('./config.ini', 'w') as f:
+with open('config.ini', 'w') as f:
     parser.write(f)
 
