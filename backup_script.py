@@ -125,6 +125,9 @@ class Backup:
         backup_path = self.parser.get('NETWORK_DRIVE', 'backup_to')
         mount_point = self.parser.get('NETWORK_DRIVE', 'mount_point')
 
+        full_path = "//"+ip+backup_path+" "+mount_point
+        logging.debug("Created variable full_path = "+full_path)
+
         logging.info("Check if network drive is mounted...")
         if os.path.isdir(self.parser.get('NETWORK_DRIVE', 'backup_to')):
             logging.info("Network drive is ALREADY MOUNTED!")
@@ -142,7 +145,7 @@ class Backup:
     def move_zip_to_nas(self):
         logging.debug("Executing move_zip_to_nas:")
         logging.info("Moving compressed file to NAS...")
-        src = self.parser.get('COMPRESS', 'dst')+self.parser.get('FILE', 'backup_name')
+        src = self.parser.get('COMPRESS', 'dst')+"/"+self.parser.get('FILE', 'backup_name')
         logging.debug("Created variable src = "+src)
         dst = self.parser.get('MOVER', 'dst')
         logging.debug("Created variable dst = "+dst)
