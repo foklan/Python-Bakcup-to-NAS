@@ -153,6 +153,7 @@ class Backup:
         self.compress_folders()
         if nas_was_offline:
             self.pinger(2)
+        self.prepare_workspace()
         self.credential_operation()
         self.mount_network_drive()
         self.move_zip_to_nas()
