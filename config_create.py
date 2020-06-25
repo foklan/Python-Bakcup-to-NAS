@@ -1,6 +1,5 @@
-from configparser import ConfigParser
+from configparser import ConfigParser as config
 
-config = ConfigParser()
 
 config['directories'] = {
     'backup_from': '/home',
@@ -13,6 +12,6 @@ config['nas_info'] = {
     'nas_mac': '48:0f:cf:33:e3:aa'
 }
 
-with open('./config.ini', 'w') as f:
-    config.write(f)
+with open('config.ini', 'w') as configfile:
+    config.write(configfile)
 
