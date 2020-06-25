@@ -14,11 +14,6 @@ class Backup:
         self.parser.read('config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
         self.working_directory = os.getcwd()
-        self.mac_address_of_nas = self.parser.get('NETWORK_DRIVE', 'mac')
-        self.backup_from = self.parser.get('FILE', 'backup_from')
-        self.backup_to = self.parser.get('FILE', 'backup_to')
-        self.backup_name = self.parser.get('FILE', 'backup_name')
-        self.move_to = self.parser.get('FILE', 'nas_mountpoint')
         self.ping_counter = 100
 
     def prepare_workspace(self):
@@ -35,8 +30,10 @@ class Backup:
 
     def start_nas(self):
         logging.debug("Executing start_nas:")
+        mac_address_of_nas = self.parser.get('NETWORK_DRIVE', 'mac')
+
         logging.info("Open Media Vault (OMV) is starting...")
-        exit_code = subprocess.call("wakeonlan "+ self.mac_address_of_nas, shell=True)
+        exit_code = subprocess.call("wakeonlan "+ mac_address_of_nas, shell=True)
         if exit_code == 0:
             logging.info("OMV has been started!")
         else:
@@ -92,8 +89,8 @@ class Backup:
             'password': getpass("Please ENTER PASSWORD for network drive: ")
         }
         # Create credentials.ini and insert values given by user
-        with open('credentials.ini', 'w') as credentialsfile:
-            self.parser.write(credentialsfile)
+        with open('credentials.ini', 'w') as credsfile:
+            self.parser.write(credsfile)
 
         # Changing privileges to root and set read only for root
         subprocess.call("sudo chown root:root credentials.ini", shell=True)
@@ -124,12 +121,16 @@ class Backup:
         logging.debug("Executing mount_network_drive:")
         self.parser.read('credentials.ini')
 
+        ip = self.parser.get('NETWORK_DRIVE', 'ip')
+        backup_path = self.parser.get('NETWORK_DRIVE', 'backup_to')
+        mount_point = self.parser.get('NETWORK_DRIVE', 'mount_point')
+
         logging.info("Check if network drive is mounted...")
-        if os.path.isdir(self.move_to):
+        if os.path.isdir(self.parser.get('NETWORK_DRIVE', 'backup_to')):
             logging.info("Network drive is ALREADY MOUNTED!")
         else:
             logging.info("Mounting NAS to " + self.parser.get('FILE', 'backup_to'))
-            exit_code = subprocess.call("sudo mount.cifs -v //"+self.parser.get('NETWORK_DRIVE', 'ip')+self.parser.get('NETWORK_DRIVE', 'backup_folder')+self.parser.get('FILE', 'backup_to')+
+            exit_code = subprocess.call("sudo mount.cifs -v //" + ip + backup_path + " " + mount_point +
                                         " -o username="+self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
             if exit_code == 0:
                 logging.info("Network drive has been mounted!")
@@ -144,7 +145,7 @@ class Backup:
         src = self.parser.get('COMPRESS', 'dst')+self.parser.get('FILE', 'backup_name')
         dst = self.parser.get('MOVER', 'dst')
 
-        exit_code = subprocess.call("sudo mv -f " + self.backup_to+self.backup_name + " " + self.move_to, shell=True)
+        exit_code = subprocess.call("sudo mv -f " + src + " " + dst, shell=True)
         if exit_code == 0:
             logging.info("Backup was successfully moved!\n")
         else:
