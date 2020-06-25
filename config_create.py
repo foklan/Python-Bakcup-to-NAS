@@ -5,7 +5,7 @@ config = ConfigParser()
 config['FILE'] = {
     'BACKUP_FROM': '/home',
     'BACKUP_TO': '/_HOST_BACKUPS/rpi_test',
-    'BACKUP_NAME': 'NEW-BACKUP-RPi3.tar.gz',
+    'BACKUP_NAME': '/NEW-BACKUP-RPi3.tar.gz',
     'NAS_MOUNTPOINT': '/media/NASHDD'
 }
 config['NAS_INFO'] = {
