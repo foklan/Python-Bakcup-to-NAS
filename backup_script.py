@@ -85,8 +85,8 @@ class Backup:
             'password': getpass("Please ENTER PASSWORD for network drive: ")
         }
         # Create credentials.ini and insert values given by user
-        with open('./credentials.ini', 'w') as f:
-            self.parser.write(f)
+        with open('credentials.ini', 'w') as credentialsfile:
+            self.parser.write(credentialsfile)
 
         # Changing privileges to root and set read only for root
         subprocess.call("sudo chown root:root credentials.ini", shell=True)
@@ -99,7 +99,7 @@ class Backup:
         if os.path.exists("credentials.ini"):
             # Check if credentials.ini contains required values
             self.parser.read('credentials.ini')
-            if self.parser.get('credentials', 'username') == "" or self.parser.get('credentials', 'password') == "":
+            if self.parser.get('credentials', 'username') == "" and self.parser.get('credentials', 'password') == "":
                 logging.warning("Configuration file is missing login details...")
                 # If there is missing something, start creating credentials.ini again
                 self.create_credentials_file()
@@ -114,6 +114,7 @@ class Backup:
 
     def mount_network_drive(self):
         self.parser.read('credentials.ini')
+        take = self.parser.get()
 
         map_folder = "/media/NASHDD"
         logging.info("Check if network drive is mounted...")
@@ -121,8 +122,9 @@ class Backup:
             logging.info("Network drive is ALREADY MOUNTED!")
         else:
             logging.info("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //10.0.2.1/Backup/_HOST_BACKUPS/rpi_test "+map_folder+" -o username="+
-                                        self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
+            exit_code = subprocess.call("sudo mount.cifs -v //"+take('NAS_INFO', 'IP')+take('NAS_INFO', 'backup_folder')+
+                                        take('FILE', 'backup_to')+" "+take('FILE', 'nas_mountpoint')+" -o username="+
+                                        take('credentials', 'username')+",password="+take('credentials', 'password'), shell=True)
             if exit_code == 0:
                 logging.info("Network drive has been mounted!")
             elif exit_code == 32:
