@@ -22,6 +22,7 @@ class Backup:
         self.ping_counter = 100
 
     def prepare_workspace(self):
+        logging.debug("Executing prepare_workspace:")
         # Check if NASHDD exists
         if os.path.exists("/media/NASHDD"):
             logging.info("Directory NASHDD already exists!")
@@ -33,6 +34,7 @@ class Backup:
                 logging.error("Error during folder creating process!")
 
     def start_nas(self):
+        logging.debug("Executing start_nas:")
         logging.info("Open Media Vault (OMV) is starting...")
         exit_code = subprocess.call("wakeonlan "+ self.mac_address_of_nas, shell=True)
         if exit_code == 0:
@@ -41,6 +43,7 @@ class Backup:
             logging.error("Error {} during OMV start!".format(exit_code))
 
     def compress_folders(self):
+        logging.debug("Executing compress_folders:")
         logging.info("Executing LOCAL backup process...")
         put_backup_file_to = self.parser.get('COMPRESS', 'dst')
         what_to_backup = self.parser.get('COMPRESS', 'src')
@@ -52,6 +55,7 @@ class Backup:
             logging.error("Compression exited with error {}".format(exit_code))
 
     def pinger(self, state):
+        logging.debug("Executing pinger:")
         # Ping once
         # State 1 should be started ONLY ON START of the script to check if OMV is running
         if state == 1:
@@ -81,6 +85,7 @@ class Backup:
                     logging.error("Error {} occurred!".format(exit_code))
 
     def create_credentials_file(self):
+        logging.debug("Executing create_credentials_file:")
         # Prompt user to insert values inside of credentials.ini
         self.parser['credentials'] = {
             'username': input("Please ENTER USERNAME for network drive: "),
@@ -95,6 +100,7 @@ class Backup:
         subprocess.call("sudo chmod 400 credentials.ini", shell=True)
 
     def credential_operation(self):
+        logging.debug("Executing credential_operation:")
         os.chdir(self.working_directory)
 
         # Check if credentials.ini does exists
@@ -115,6 +121,7 @@ class Backup:
             self.create_credentials_file()
 
     def mount_network_drive(self):
+        logging.debug("Executing mount_network_drive:")
         self.parser.read('credentials.ini')
 
         logging.info("Check if network drive is mounted...")
@@ -132,6 +139,7 @@ class Backup:
                 logging.critical("NAS disk was not successfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
 
     def move_zip_to_nas(self):
+        logging.debug("Executing move_zip_to_nas:")
         logging.info("Moving compressed file to NAS...")
         src = self.parser.get('COMPRESS', 'dst')+self.parser.get('FILE', 'backup_name')
         dst = self.parser.get('MOVER', 'dst')
@@ -143,6 +151,7 @@ class Backup:
             logging.error("Error {} occurred!".format(exit_code))
 
     def shutdown_nas(self):
+        logging.debug("Executing shutdown_nas:")
         logging.info("OMV is shutting down...")
         exit_code = subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'",shell=True)
         if exit_code == 0:
