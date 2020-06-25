@@ -132,7 +132,7 @@ class Backup:
         if os.path.isdir(self.parser.get('NETWORK_DRIVE', 'backup_to')):
             logging.info("Network drive is ALREADY MOUNTED!")
         else:
-            logging.info("Mounting NAS to " + self.parser.get('FILE', 'backup_to'))
+            logging.info("Mounting NAS to " + self.parser.get('NETWORK_DRIVE', 'backup_to'))
             exit_code = subprocess.call("sudo mount.cifs -v //" + ip + backup_path + " " + mount_point +
                                         " -o username="+self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
             if exit_code == 0:
