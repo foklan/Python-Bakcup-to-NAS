@@ -42,8 +42,8 @@ class Backup:
 
     def compress_folders(self):
         logging.info("Executing LOCAL backup process...")
-        put_backup_file_to = self.parser.get('COMPRESS', 'move_compressed_to')
-        what_to_backup = self.parser.get('COMPRESS', 'compress_from')
+        put_backup_file_to = self.parser.get('COMPRESS', 'dst')
+        what_to_backup = self.parser.get('COMPRESS', 'src')
 
         exit_code = subprocess.call("sudo tar -czf " + put_backup_file_to + " " + what_to_backup, shell=True)
         if exit_code == 0:
