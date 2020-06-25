@@ -14,7 +14,7 @@ class Backup:
         self.parser.read('config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
         self.working_directory = os.getcwd()
-        self.mac_address_of_nas = self.parser.get('NAS_INFO', 'mac')
+        self.mac_address_of_nas = self.parser.get('NETWORK_DRIVE', 'mac')
         self.backup_from = self.parser.get('FILE', 'backup_from')
         self.backup_to = self.parser.get('FILE', 'backup_to')
         self.backup_name = self.parser.get('FILE', 'backup_name')
@@ -42,8 +42,10 @@ class Backup:
 
     def compress_folders(self):
         logging.info("Executing LOCAL backup process...")
-        path_for_backup_file = self.backup_to+self.backup_name
-        exit_code = subprocess.call("sudo tar -czf " + path_for_backup_file + " " + self.backup_from, shell=True)
+        put_backup_file_to = self.parser.get('COMPRESS', 'move_compressed_to')
+        what_to_backup = self.parser.get('COMPRESS', 'compress_from')
+
+        exit_code = subprocess.call("sudo tar -czf " + put_backup_file_to + " " + what_to_backup, shell=True)
         if exit_code == 0:
             logging.info("Compression is DONE!")
         else:
@@ -115,15 +117,13 @@ class Backup:
     def mount_network_drive(self):
         self.parser.read('credentials.ini')
 
-        map_folder = "/media/NASHDD"
         logging.info("Check if network drive is mounted...")
         if os.path.isdir(self.move_to):
             logging.info("Network drive is ALREADY MOUNTED!")
         else:
-            logging.info("Mounting NAS to " + map_folder)
-            exit_code = subprocess.call("sudo mount.cifs -v //"+self.parser.get('NAS_INFO', 'IP')+self.parser.get('NAS_INFO', 'backup_folder')+
-                                        self.parser.get('FILE', 'backup_to')+" "+self.parser.get('FILE', 'nas_mountpoint')+" -o username="+
-                                        self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
+            logging.info("Mounting NAS to " + self.parser.get('FILE', 'backup_to'))
+            exit_code = subprocess.call("sudo mount.cifs -v //"+self.parser.get('NETWORK_DRIVE', 'ip')+self.parser.get('NETWORK_DRIVE', 'backup_folder')+self.parser.get('FILE', 'backup_to')+
+                                        " -o username="+self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
             if exit_code == 0:
                 logging.info("Network drive has been mounted!")
             elif exit_code == 32:
@@ -133,6 +133,9 @@ class Backup:
 
     def move_zip_to_nas(self):
         logging.info("Moving compressed file to NAS...")
+        src = self.parser.get('COMPRESS', 'dst')+self.parser.get('FILE', 'backup_name')
+        dst = self.parser.get('MOVER', 'dst')
+
         exit_code = subprocess.call("sudo mv -f " + self.backup_to+self.backup_name + " " + self.move_to, shell=True)
         if exit_code == 0:
             logging.info("Backup was successfully moved!\n")
