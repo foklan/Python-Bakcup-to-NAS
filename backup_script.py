@@ -16,7 +16,7 @@ class Configuration:
 class Backup:
     def __init__(self):
         self.parser = ConfigParser()
-        self.parser.read('config.ini')
+        self.parser.read('/venv/config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
         self.working_directory = os.getcwd()
         self.mac_address_of_nas = self.parser.get('nas_info', 'nas_mac')
