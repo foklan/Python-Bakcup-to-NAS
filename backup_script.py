@@ -145,6 +145,7 @@ class Backup:
                 logging.critical("NAS disk was not successfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
 
     def move_zip_to_nas(self):
+        self.parser.read('config.ini')
         logging.debug("Executing move_zip_to_nas:")
         logging.info("Moving compressed file to NAS...")
         # src = self.parser.get('COMPRESS', 'dst')+"/"+self.parser.get('FILE', 'backup_name')
