@@ -43,7 +43,9 @@ class Backup:
         logging.debug("Executing compress_folders:")
         logging.info("Executing LOCAL backup process...")
         put_backup_file_to = self.parser.get('COMPRESS', 'dst')+self.parser.get('FILE', 'backup_name')
+        logging.debug("Variable put_backup_file_to: "+put_backup_file_to)
         what_to_backup = self.parser.get('COMPRESS', 'src')
+        logging.debug("Variable what_to_backup:"+what_to_backup)
 
         exit_code = subprocess.call("sudo tar -czf " + put_backup_file_to + " " + what_to_backup, shell=True)
         if exit_code == 0:
@@ -145,7 +147,8 @@ class Backup:
     def move_zip_to_nas(self):
         logging.debug("Executing move_zip_to_nas:")
         logging.info("Moving compressed file to NAS...")
-        src = self.parser.get('COMPRESS', 'dst')+"/"+self.parser.get('FILE', 'backup_name')
+        # src = self.parser.get('COMPRESS', 'dst')+"/"+self.parser.get('FILE', 'backup_name')
+        src = self.parser.get('COMPRESS', 'dst') + self.parser.get('FILE', 'backup_name')
         logging.debug("Created variable src = "+src)
         dst = self.parser.get('MOVER', 'dst')
         logging.debug("Created variable dst = "+dst)
