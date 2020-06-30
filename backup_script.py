@@ -121,14 +121,20 @@ class Backup:
 
     def mount_network_drive(self):
         logging.debug("Executing mount_network_drive:")
-        self.parser.read('credentials.ini')
+        self.parser.read('config.ini')
 
         ip = self.parser.get('NETWORK_DRIVE', 'ip')
         backup_path = self.parser.get('NETWORK_DRIVE', 'backup_to')
         mount_point = self.parser.get('NETWORK_DRIVE', 'mount_point')
+        logging.debug("Created variable backup_path = "+backup_path)
+        logging.debug("Created variable mount_point = "+mount_point)
 
         full_path = "//"+ip+backup_path+" "+mount_point
         logging.debug("Created variable full_path = "+full_path)
+
+        self.parser.read('credentials.ini')
+        username = self.parser.get('credentials', 'username')
+        password = self.parser.get('credentials', 'password')
 
         logging.info("Check if network drive is mounted...")
         if os.path.isdir(self.parser.get('NETWORK_DRIVE', 'backup_to')):
@@ -136,7 +142,7 @@ class Backup:
         else:
             logging.info("Mounting NAS to " + self.parser.get('NETWORK_DRIVE', 'backup_to'))
             exit_code = subprocess.call("sudo mount.cifs -v //" + ip + backup_path + " " + mount_point +
-                                        " -o username="+self.parser.get('credentials', 'username')+",password="+self.parser.get('credentials', 'password'), shell=True)
+                                        " -o username="+username+",password="+password, shell=True)
             if exit_code == 0:
                 logging.info("Network drive has been mounted!")
             elif exit_code == 32:
