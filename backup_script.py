@@ -156,6 +156,7 @@ class Backup:
         logging.debug("Executing move_zip_to_nas:")
         logging.info("Moving compressed file to NAS...")
         # src = self.parser.get('COMPRESS', 'dst')+"/"+self.parser.get('FILE', 'backup_name')
+
         src = self.parser.get('COMPRESS', 'dst') + self.parser.get('FILE', 'backup_name')
         logging.debug("Created variable src = "+src)
         dst = self.parser.get('MOVER', 'dst')
