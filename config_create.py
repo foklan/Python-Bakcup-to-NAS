@@ -22,6 +22,10 @@ config['MOVER'] = {
     'DST': "/media/NASHDD/"
 }
 
+config['PINGER'] = {
+    'ping_counter': "100"
+}
+
 with open('config.ini', 'w') as configfile:
     config.write(configfile)
 

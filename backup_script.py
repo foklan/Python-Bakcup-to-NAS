@@ -7,14 +7,12 @@ import logging
 import time
 import os
 
+
 class Backup:
     def __init__(self):
-        self.parser = ConfigParser()
+        self.config_parser = ConfigParser()
         self.cred_parser = ConfigParser()
-        self.parser.read('config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
-        self.working_directory = os.getcwd()
-        self.ping_counter = 100
 
     def prepare_workspace(self):
         logging.debug("Executing prepare_workspace:")
@@ -30,10 +28,10 @@ class Backup:
 
     def start_nas(self):
         logging.debug("Executing start_nas:")
-        mac_address_of_nas = self.parser.get('NETWORK_DRIVE', 'mac')
+        mac_address_of_nas = self.config_parser.get('NETWORK_DRIVE', 'mac')
 
         logging.info("Open Media Vault (OMV) is starting...")
-        exit_code = subprocess.call("wakeonlan "+ mac_address_of_nas, shell=True)
+        exit_code = subprocess.call("wakeonlan " + mac_address_of_nas, shell=True)
         if exit_code == 0:
             logging.info("OMV has been started!")
         else:
@@ -42,9 +40,9 @@ class Backup:
     def compress_folders(self):
         logging.debug("Executing compress_folders:")
         logging.info("Executing LOCAL backup process...")
-        put_backup_file_to = self.parser.get('COMPRESS', 'dst')+self.parser.get('FILE', 'backup_name')
+        put_backup_file_to = self.config_parser.get('COMPRESS', 'dst')+self.config_parser.get('FILE', 'backup_name')
         logging.debug("Variable put_backup_file_to: "+put_backup_file_to)
-        what_to_backup = self.parser.get('COMPRESS', 'src')
+        what_to_backup = self.config_parser.get('COMPRESS', 'src')
         logging.debug("Variable what_to_backup:"+what_to_backup)
 
         exit_code = subprocess.call("sudo tar -czf " + put_backup_file_to + " " + what_to_backup, shell=True)
@@ -54,6 +52,9 @@ class Backup:
             logging.error("Compression exited with error {}".format(exit_code))
 
     def pinger(self, state):
+        self.config_parser.read('config.ini')
+        ping_counter = self.config_parser.get('PINGER', 'ping_counter')
+
         logging.debug("Executing pinger:")
         # Ping once
         # State 1 should be started ONLY ON START of the script to check if OMV is running
@@ -71,9 +72,9 @@ class Backup:
         # State 2 should be started after start_nas method to check if OMV booted up
         elif state == 2:
             logging.info("Waiting for OMV to bootup...")
-            while self.ping_counter > 0:
+            while int(ping_counter) > 0:
                 exit_code = subprocess.call("ping -c 1 10.0.2.1", shell=True)
-                self.ping_counter -= 1
+                ping_counter -= 1
                 if exit_code == 0:
                     logging.info("OMV is ONLINE!")
                     break
@@ -100,7 +101,7 @@ class Backup:
 
     def credential_operation(self):
         logging.debug("Executing credential_operation:")
-        os.chdir(self.working_directory)
+        os.chdir(os.getcwd())
 
         # Check if credentials.ini does exists
         if os.path.exists("credentials.ini"):
@@ -121,11 +122,11 @@ class Backup:
 
     def mount_network_drive(self):
         logging.debug("Executing mount_network_drive:")
-        self.parser.read('config.ini')
+        self.config_parser.read('config.ini')
 
-        ip = self.parser.get('NETWORK_DRIVE', 'ip')
-        backup_path = self.parser.get('NETWORK_DRIVE', 'backup_to')
-        mount_point = self.parser.get('NETWORK_DRIVE', 'mount_point')
+        ip = self.config_parser.get('NETWORK_DRIVE', 'ip')
+        backup_path = self.config_parser.get('NETWORK_DRIVE', 'backup_to')
+        mount_point = self.config_parser.get('NETWORK_DRIVE', 'mount_point')
         logging.debug("Created variable backup_path = "+backup_path)
         logging.debug("Created variable mount_point = "+mount_point)
 
@@ -136,45 +137,49 @@ class Backup:
         usr = self.cred_parser.get('credentials', 'username')
         pwd = self.cred_parser.get('credentials', 'password')
 
-        logging.info("Mounting NAS to " + self.parser.get('NETWORK_DRIVE', 'backup_to'))
-        exit_code = subprocess.call("sudo mount.cifs -v //" + ip + backup_path + " " + mount_point + " -o username=" + usr + ",password=" + pwd, shell=True)
-        if exit_code == 0:
-            logging.info("Network drive has been mounted!")
-        elif exit_code == 32:
-            logging.critical("NAS disk was not successfully mounted due to incorrect login credentials, check if credentials are correct in credentials.ini!")
-        else:
-            logging.critical("NAS disk was not successfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
+        try:
+            logging.info("Mounting NAS to " + self.config_parser.get('NETWORK_DRIVE', 'backup_to'))
+            exit_code = subprocess.call("sudo mount.cifs -v //" + ip + backup_path + " " + mount_point + " -o username=" + usr + ",password=" + pwd, shell=True)
+            if exit_code == 0:
+                logging.info("Network drive has been mounted!")
+            elif exit_code == 32:
+                logging.critical("NAS disk was not successfully mounted due to incorrect login credentials, check if credentials are correct in credentials.ini!")
+            else:
+                logging.critical("NAS disk was not successfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
+        except:
+            pass
 
     def unmount_network_drive(self):
         logging.debug("Executing unmount_network_drive:")
-        self.parser.read('config.ini')
-        exit_code = subprocess.call("sudo umount "+self.parser.get('NETWORK_DRIVE', 'mount_point'),shell=True)
+        self.config_parser.read('config.ini')
+        exit_code = subprocess.call("sudo umount "+self.config_parser.get('NETWORK_DRIVE', 'mount_point'), shell=True)
         if exit_code == 0:
-            logging.info("Network drive was successfully unmounted!")
+            logging.info("Network drive was successfully unmounted!\n")
         else:
             logging.error("Network drive was NOT successfully UNMOUNTED!")
 
     def move_zip_to_nas(self):
-        self.parser.read('config.ini')
+        self.config_parser.read('config.ini')
         logging.debug("Executing move_zip_to_nas:")
         logging.info("Moving compressed file to NAS...")
-        # src = self.parser.get('COMPRESS', 'dst')+"/"+self.parser.get('FILE', 'backup_name')
+        # src = self.config_parser.get('COMPRESS', 'dst')+"/"+self.config_parser.get('FILE', 'backup_name')
 
-        src = self.parser.get('COMPRESS', 'dst') + self.parser.get('FILE', 'backup_name')
+        src = self.config_parser.get('COMPRESS', 'dst') + self.config_parser.get('FILE', 'backup_name')
         logging.debug("Created variable src = "+src)
-        dst = self.parser.get('MOVER', 'dst')
+        dst = self.config_parser.get('MOVER', 'dst')
         logging.debug("Created variable dst = "+dst)
 
         exit_code = subprocess.call("sudo mv -f " + src + " " + dst, shell=True)
         if exit_code == 0:
-            logging.info("Backup was successfully moved!\n")
+            logging.info("Backup was successfully moved!")
         else:
             logging.error("Error {} occurred during file move!".format(exit_code))
 
-    def shutdown_nas(self):
+    @staticmethod
+    def shutdown_nas():
         logging.debug("Executing shutdown_nas:")
         logging.info("OMV is shutting down...")
-        exit_code = subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'",shell=True)
+        exit_code = subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'", shell=True)
         if exit_code == 0:
             logging.info("Command to shutdown OMV was successfully executed!\n")
         else:
@@ -184,17 +189,16 @@ class Backup:
         nas_was_offline = self.pinger(1)
         if nas_was_offline:
             self.start_nas()
+        self.credential_operation()
         self.compress_folders()
         if nas_was_offline:
             self.pinger(2)
         self.prepare_workspace()
-        self.credential_operation()
         self.mount_network_drive()
         self.move_zip_to_nas()
         self.unmount_network_drive()
         if nas_was_offline:
             self.shutdown_nas()
-
 
 
 backup = Backup()
