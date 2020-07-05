@@ -133,22 +133,26 @@ class Backup:
         logging.debug("Created variable full_path = "+full_path)
 
         self.cred_parser.read('credentials.ini')
-        username = self.cred_parser.get('credentials', 'username')
-        password = self.cred_parser.get('credentials', 'password')
+        usr = self.cred_parser.get('credentials', 'username')
+        pwd = self.cred_parser.get('credentials', 'password')
 
-        logging.info("Check if network drive is mounted...")
-        if os.path.isdir(self.parser.get('NETWORK_DRIVE', 'backup_to')):
-            logging.info("Network drive is ALREADY MOUNTED!")
+        logging.info("Mounting NAS to " + self.parser.get('NETWORK_DRIVE', 'backup_to'))
+        exit_code = subprocess.call("sudo mount.cifs -v //" + ip + backup_path + " " + mount_point + " -o username=" + usr + ",password=" + pwd, shell=True)
+        if exit_code == 0:
+            logging.info("Network drive has been mounted!")
+        elif exit_code == 32:
+            logging.critical("NAS disk was not successfully mounted due to incorrect login credentials, check if credentials are correct in credentials.ini!")
         else:
-            logging.info("Mounting NAS to " + self.parser.get('NETWORK_DRIVE', 'backup_to'))
-            exit_code = subprocess.call("sudo mount.cifs -v //" + ip + backup_path + " " + mount_point +
-                                        " -o username="+username+",password="+password, shell=True)
-            if exit_code == 0:
-                logging.info("Network drive has been mounted!")
-            elif exit_code == 32:
-                logging.critical("NAS disk was not successfully mounted, check if credentials are correct in credentials.ini!")
-            else:
-                logging.critical("NAS disk was not successfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
+            logging.critical("NAS disk was not successfully mounted, ERROR CODE {}!!!!!!!!\n".format(exit_code))
+
+    def unmount_network_drive(self):
+        logging.debug("Executing unmount_network_drive:")
+        self.parser.read('config.ini')
+        exit_code = subprocess.call("sudo umount "+self.parser.get('NETWORK_DRIVE', 'mount_point'),shell=True)
+        if exit_code == 0:
+            logging.info("Network drive was successfully unmounted!")
+        else:
+            logging.error("Network drive was NOT successfully UNMOUNTED!")
 
     def move_zip_to_nas(self):
         self.parser.read('config.ini')
@@ -187,6 +191,7 @@ class Backup:
         self.credential_operation()
         self.mount_network_drive()
         self.move_zip_to_nas()
+        self.unmount_network_drive()
         if nas_was_offline:
             self.shutdown_nas()
 
