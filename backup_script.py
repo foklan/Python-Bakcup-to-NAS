@@ -53,7 +53,7 @@ class Backup:
 
     def pinger(self, state):
         self.config_parser.read('config.ini')
-        ping_counter = self.config_parser.get('PINGER', 'ping_counter')
+        ping_counter = int(self.config_parser.get('PINGER', 'ping_counter'))
 
         logging.debug("Executing pinger:")
         # Ping once
@@ -72,7 +72,7 @@ class Backup:
         # State 2 should be started after start_nas method to check if OMV booted up
         elif state == 2:
             logging.info("Waiting for OMV to bootup...")
-            while int(ping_counter) > 0:
+            while ping_counter > 0:
                 exit_code = subprocess.call("ping -c 1 10.0.2.1", shell=True)
                 ping_counter -= 1
                 if exit_code == 0:
