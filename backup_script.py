@@ -121,6 +121,7 @@ class Backup:
             self.create_credentials_file()
 
     def mount_network_drive(self):
+        time.sleep(10)
         logging.debug("Executing mount_network_drive:")
         self.config_parser.read('config.ini')
 
@@ -194,11 +195,14 @@ class Backup:
         if nas_was_offline:
             self.pinger(2)
         self.prepare_workspace()
-        self.mount_network_drive()
-        self.move_zip_to_nas()
-        self.unmount_network_drive()
-        if nas_was_offline:
-            self.shutdown_nas()
+        try:
+            self.mount_network_drive()
+            self.move_zip_to_nas()
+            self.unmount_network_drive()
+            if nas_was_offline:
+                self.shutdown_nas()
+        except:
+            pass
 
 
 backup = Backup()
