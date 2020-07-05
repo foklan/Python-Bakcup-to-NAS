@@ -11,6 +11,7 @@ import os
 class Backup:
     def __init__(self):
         self.parser = ConfigParser()
+        self.cred_parser = ConfigParser()
         self.parser.read('config.ini')
         logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
         self.working_directory = os.getcwd()
@@ -86,13 +87,13 @@ class Backup:
     def create_credentials_file(self):
         logging.debug("Executing create_credentials_file:")
         # Prompt user to insert values inside of credentials.ini
-        self.parser['credentials'] = {
+        self.cred_parser['credentials'] = {
             'username': input("Please ENTER USERNAME for network drive: "),
             'password': getpass("Please ENTER PASSWORD for network drive: ")
         }
         # Create credentials.ini and insert values given by user
         with open('credentials.ini', 'w') as credsfile:
-            self.parser.write(credsfile)
+            self.cred_parser.write(credsfile)
 
         # Changing privileges to root and set read only for root
         subprocess.call("sudo chown root:root credentials.ini", shell=True)
@@ -105,8 +106,8 @@ class Backup:
         # Check if credentials.ini does exists
         if os.path.exists("credentials.ini"):
             # Check if credentials.ini contains required values
-            self.parser.read('credentials.ini')
-            if self.parser.get('credentials', 'username') == "" and self.parser.get('credentials', 'password') == "":
+            self.cred_parser.read('credentials.ini')
+            if self.cred_parser.get('credentials', 'username') == "" and self.cred_parser.get('credentials', 'password') == "":
                 logging.warning("Configuration file is missing login details...")
                 # If there is missing something, start creating credentials.ini again
                 self.create_credentials_file()
@@ -132,9 +133,9 @@ class Backup:
         full_path = "//"+ip+backup_path+" "+mount_point
         logging.debug("Created variable full_path = "+full_path)
 
-        self.parser.read('credentials.ini')
-        username = self.parser.get('credentials', 'username')
-        password = self.parser.get('credentials', 'password')
+        self.cred_parserparser.read('credentials.ini')
+        username = self.cred_parserparser.get('credentials', 'username')
+        password = self.cred_parser.get('credentials', 'password')
 
         logging.info("Check if network drive is mounted...")
         if os.path.isdir(self.parser.get('NETWORK_DRIVE', 'backup_to')):
