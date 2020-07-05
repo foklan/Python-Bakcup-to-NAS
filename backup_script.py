@@ -132,8 +132,8 @@ class Backup:
         full_path = "//"+ip+backup_path+" "+mount_point
         logging.debug("Created variable full_path = "+full_path)
 
-        self.cred_parserparser.read('credentials.ini')
-        username = self.cred_parserparser.get('credentials', 'username')
+        self.cred_parser.read('credentials.ini')
+        username = self.cred_parser.get('credentials', 'username')
         password = self.cred_parser.get('credentials', 'password')
 
         logging.info("Check if network drive is mounted...")
