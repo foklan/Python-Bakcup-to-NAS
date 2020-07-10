@@ -1,10 +1,10 @@
 # Script for backup to NAS
-This script is **only for Linux** systems.
-It chcecks if NAS is running and if not, it will start the NAS with wakeonlan functionality.
-Then it will prompt you to enter **username** and **password** for NAS to mount it under these credentials.
-It will store those credentials to *credentials.ini* file so you don't have to type it again. (only if you want to edit it)
-Then it will create backup from desired source (configure in *config.ini*)
-And finally it will pull *tar.gz* to mounted NAS drive and dismount this drive at the end of the process.
+- This script is **only for Linux** systems.
+- It chcecks if NAS is running and if not, it will start the NAS with wakeonlan functionality.
+- Then it will prompt you to enter **username** and **password** for NAS to mount it under these credentials.
+- It will store those credentials to *credentials.ini* file so you don't have to type it again. (only if you want to edit it)
+- Then it will create backup from desired source (configure in *config.ini*)
+- And finally it will pull *tar.gz* to mounted NAS drive and dismount this drive at the end of the process.
 
 # Installation
 1. This script requires package called wakeonlan which can be installed with this command:
