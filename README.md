@@ -8,7 +8,7 @@
 
 # Installation
 1. This script requires package called wakeonlan which can be installed with this command:
-- `sudo apt install wakeonlan`
+  - `sudo apt install wakeonlan`
 
 2. Download script by using: 
 - `git clone https://github.com/foklan/Python-Bakcup-to-NAS.git`
