@@ -17,5 +17,5 @@
 - `ssh-keygen -t rsa`
 - `ssh-copy-id -i $HOME/.ssh/id_rsa.pub [user]@[ip of NAS]`
  
-5. First time you need to run the script manually for creation of credentials.ini where are the credentials for accessing the NAS. Script will prompt you to enter username and password. So navigate to script destination folder and run following command.
+4. First time you need to run the script manually for creation of credentials.ini where are the credentials for accessing the NAS. Script will prompt you to enter username and password. So navigate to script destination folder and run following command.
 - `sudo python3 backup_script.sh`
