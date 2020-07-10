@@ -8,14 +8,14 @@
 
 # Installation
 1. This script requires package called wakeonlan which can be installed with this command:
-`sudo apt install wakeonlan`
+- `sudo apt install wakeonlan`
 
 2. Download script by using: 
-`git clone https://github.com/foklan/Python-Bakcup-to-NAS.git`
+- `git clone https://github.com/foklan/Python-Bakcup-to-NAS.git`
 
 3. You have to create rsa certificate to allow machine where is backup script running to access NAS without password and shut it down. So this commands should be executed to create certificate and copy it to NAS.
-`ssh-keygen -t rsa`
-`ssh-copy-id -i $HOME/.ssh/id_rsa.pub [user]@[ip of NAS]`
+- `ssh-keygen -t rsa`
+- `ssh-copy-id -i $HOME/.ssh/id_rsa.pub [user]@[ip of NAS]`
  
 5. First time you need to run the script manually for creation of credentials.ini where are the credentials for accessing the NAS. Script will prompt you to enter username and password. So navigate to script destination folder and run following command.
-`sudo python3 backup_script.sh`
+- `sudo python3 backup_script.sh`
