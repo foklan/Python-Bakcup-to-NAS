@@ -13,7 +13,7 @@ config['FILE'] = {
 config['NETWORK_DRIVE'] = {
     'IP': '10.0.2.1',
     'MAC': '48:0f:cf:33:e3:aa',
-    'BACKUP_TO': '/Backup/_HOST_BACKUPS/rpi_test',
+    'BACKUP_TO': '/Backup/_HOST_BACKUPS/raspberryppi/rpi_test',
     'MOUNT_POINT': '/media/NASHDD'
 }
 
