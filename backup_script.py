@@ -17,20 +17,8 @@ class Backup:
         # CRITICAL: A serious error, indicating that the program itself may be unable to continue running.
 
         log_level = int(self.config_parser.get('CONFIG', 'log_level'))
+        print(log_level)
 
-        if log_level == 0:
-            logging.basicConfig(level=logging.CRITICAL, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
-        elif log_level == 1:
-            logging.basicConfig(level=logging.ERROR, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
-        elif log_level == 2:
-            logging.basicConfig(level=logging.WARNING, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
-        elif log_level == 3:
-            logging.basicConfig(level=logging.INFO, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
-        elif log_level == 4:
-            logging.basicConfig(level=logging.DEBUG, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
-        else:
-            print('WRONG LOGGING PARAMETER!!! Setting  to DEBUG level!!!')
-            logging.basicConfig(level=logging.DEBUG, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
 
     def __init__(self):
         self.config_parser = ConfigParser()
