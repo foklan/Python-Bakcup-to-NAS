@@ -1,6 +1,11 @@
 from configparser import ConfigParser
 
-config = ConfigParser()
+config = ConfigParser(allow_no_value=True)
+
+config['CONFIG'] = {
+    '; Logging levels\n; 0 = CRITICAL\n; 1 = ERROR\n; 2 = WARNING\n; 3 = INFO\n; 4 = DEBUG':None,
+    'LOG_LEVEL': '0'
+}
 
 config['FILE'] = {
     'BACKUP_NAME': '/NEW-BACKUP-RPi3.tar.gz'

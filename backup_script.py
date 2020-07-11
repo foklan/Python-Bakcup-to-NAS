@@ -10,9 +10,32 @@ import os
 
 class Backup:
     def __init__(self):
+        self.logging_level()
         self.config_parser = ConfigParser()
         self.cred_parser = ConfigParser()
-        logging.basicConfig(level=logging.DEBUG, filename="backup.log", format="%(asctime)s:%(levelname)s:%(message)s")
+
+    def logging_level(self):
+        # DEBUG: Detailed information, typically of interest only when diagnosing problems.
+        # INFO : Confirmation that things are working as expected.
+        # WARNING : An indication that something unexpected happened, or indicative of some problem in the near future (e.g. 'disk space low'). The software is still working as expected.
+        # ERROR: Due to a more serious problem, the software has not been able to perform some function.
+        # CRITICAL: A serious error, indicating that the program itself may be unable to continue running.
+
+        log_level = self.config_parser.get('CONFIG', 'log_level')
+
+        if log_level == 0:
+            logging.basicConfig(level=logging.CRITICAL, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        elif log_level == 1:
+            logging.basicConfig(level=logging.ERROR, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        elif log_level == 2:
+            logging.basicConfig(level=logging.WARNING, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        elif log_level == 3:
+            logging.basicConfig(level=logging.INFO, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        elif log_level == 4:
+            logging.basicConfig(level=logging.DEBUG, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        else:
+            print('WRONG LOGGING PARAMETER!!! Setting  to DEBUG level!!!')
+            logging.basicConfig(level=logging.DEBUG, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
 
     def prepare_workspace(self):
         logging.debug("Executing prepare_workspace:")
@@ -54,13 +77,14 @@ class Backup:
     def pinger(self, state):
         self.config_parser.read('config.ini')
         ping_counter = int(self.config_parser.get('PINGER', 'ping_counter'))
+        nas_ip = self.config_parser.get('NETWORK_DRIVE', 'ip')
 
         logging.debug("Executing pinger:")
         # Ping once
         # State 1 should be started ONLY ON START of the script to check if OMV is running
         if state == 1:
             logging.info("Check if OMV is already running...")
-            exit_code = subprocess.call("ping -c 1 10.0.2.1", shell=True)
+            exit_code = subprocess.call("ping -c 1 "+nas_ip, shell=True)
             if exit_code == 0:
                 logging.info("OMV is running and will not be turned off after backup!!!")
                 return False
@@ -73,7 +97,7 @@ class Backup:
         elif state == 2:
             logging.info("Waiting for OMV to bootup...")
             while ping_counter > 0:
-                exit_code = subprocess.call("ping -c 1 10.0.2.1", shell=True)
+                exit_code = subprocess.call("ping -c 1 "+nas_ip, shell=True)
                 ping_counter -= 1
                 if exit_code == 0:
                     logging.info("OMV is ONLINE!")
@@ -180,7 +204,7 @@ class Backup:
     def shutdown_nas():
         logging.debug("Executing shutdown_nas:")
         logging.info("OMV is shutting down...")
-        exit_code = subprocess.call("ssh root@10.0.1.5 'cd /root/;./shutdown.sh'", shell=True)
+        exit_code = subprocess.call("ssh root@10.0.1.5 'poweroff'", shell=True)
         if exit_code == 0:
             logging.info("Command to shutdown OMV was successfully executed!\n")
         else:
