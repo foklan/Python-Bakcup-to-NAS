@@ -9,21 +9,33 @@ import os
 
 
 class Backup:
+    def __init__(self):
+        self.config_parser = ConfigParser()
+        self.cred_parser = ConfigParser()
+        self.logging_level()
+
     def logging_level(self):
         # DEBUG: Detailed information, typically of interest only when diagnosing problems.
         # INFO : Confirmation that things are working as expected.
         # WARNING : An indication that something unexpected happened, or indicative of some problem in the near future (e.g. 'disk space low'). The software is still working as expected.
         # ERROR: Due to a more serious problem, the software has not been able to perform some function.
         # CRITICAL: A serious error, indicating that the program itself may be unable to continue running.
-
+        self.config_parser.read('config.ini')
         log_level = int(self.config_parser.get('CONFIG', 'log_level'))
-        print(log_level)
 
-
-    def __init__(self):
-        self.config_parser = ConfigParser()
-        self.cred_parser = ConfigParser()
-        self.logging_level()
+        if log_level == 0:
+            logging.basicConfig(level=logging.CRITICAL, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        elif log_level == 1:
+            logging.basicConfig(level=logging.ERROR, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        elif log_level == 2:
+            logging.basicConfig(level=logging.WARNING, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        elif log_level == 3:
+            logging.basicConfig(level=logging.INFO, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        elif log_level == 4:
+            logging.basicConfig(level=logging.DEBUG, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+        else:
+            print('WRONG LOGGING PARAMETER!!! Setting  to DEBUG level!!!')
+            logging.basicConfig(level=logging.DEBUG, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
 
     def prepare_workspace(self):
         logging.debug("Executing prepare_workspace:")
