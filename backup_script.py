@@ -9,11 +9,6 @@ import os
 
 
 class Backup:
-    def __init__(self):
-        self.logging_level()
-        self.config_parser = ConfigParser()
-        self.cred_parser = ConfigParser()
-
     def logging_level(self):
         # DEBUG: Detailed information, typically of interest only when diagnosing problems.
         # INFO : Confirmation that things are working as expected.
@@ -21,7 +16,7 @@ class Backup:
         # ERROR: Due to a more serious problem, the software has not been able to perform some function.
         # CRITICAL: A serious error, indicating that the program itself may be unable to continue running.
 
-        log_level = self.config_parser.get('CONFIG', 'log_level')
+        log_level = int(self.config_parser.get('CONFIG', 'log_level'))
 
         if log_level == 0:
             logging.basicConfig(level=logging.CRITICAL, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
@@ -36,6 +31,11 @@ class Backup:
         else:
             print('WRONG LOGGING PARAMETER!!! Setting  to DEBUG level!!!')
             logging.basicConfig(level=logging.DEBUG, filename="backup.log",format="%(asctime)s:%(levelname)s:%(message)s")
+
+    def __init__(self):
+        self.config_parser = ConfigParser()
+        self.cred_parser = ConfigParser()
+        self.logging_level()
 
     def prepare_workspace(self):
         logging.debug("Executing prepare_workspace:")
