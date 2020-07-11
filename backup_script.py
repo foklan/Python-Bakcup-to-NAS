@@ -53,9 +53,9 @@ class Backup:
     def compress_folders(self):
         logging.debug("Executing compress_folders:")
         logging.info("Executing LOCAL backup process...")
-        put_backup_file_to = self.config_parser.get('COMPRESS', 'dst')+self.config_parser.get('FILE', 'backup_name')
+        put_backup_file_to = '/tmp' + self.config_parser.get('CONFIG', 'backup_name')
         logging.debug("Variable put_backup_file_to: "+put_backup_file_to)
-        what_to_backup = self.config_parser.get('COMPRESS', 'src')
+        what_to_backup = self.config_parser.get('CONFIG', 'src')
         logging.debug("Variable what_to_backup:"+what_to_backup)
 
         exit_code = subprocess.call("sudo tar -czf " + put_backup_file_to + " " + what_to_backup, shell=True)
@@ -66,7 +66,7 @@ class Backup:
 
     def pinger(self, state):
         self.config_parser.read('config.ini')
-        ping_counter = int(self.config_parser.get('PINGER', 'ping_counter'))
+        ping_counter = int(self.config_parser.get('CONFIG', 'ping_counter'))
         nas_ip = self.config_parser.get('NETWORK_DRIVE', 'ip')
 
         logging.debug("Executing pinger:")
@@ -176,12 +176,11 @@ class Backup:
     def move_zip_to_nas(self):
         self.config_parser.read('config.ini')
         logging.debug("Executing move_zip_to_nas:")
-        logging.info("Moving compressed file to NAS...")
-        # src = self.config_parser.get('COMPRESS', 'dst')+"/"+self.config_parser.get('FILE', 'backup_name')
+        logging.info("Moving compressed file to mount-point...")
 
-        src = self.config_parser.get('COMPRESS', 'dst') + self.config_parser.get('FILE', 'backup_name')
+        src = '/tmp' + self.config_parser.get('CONFIG', 'backup_name')
         logging.debug("Created variable src = "+src)
-        dst = self.config_parser.get('MOVER', 'dst')
+        dst = self.config_parser.get('NETWORK_DRIVE', 'mount_point')
         logging.debug("Created variable dst = "+dst)
 
         exit_code = subprocess.call("sudo mv -f " + src + " " + dst, shell=True)
